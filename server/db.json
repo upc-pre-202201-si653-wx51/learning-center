@@ -1,0 +1,10 @@
+{
+  "tutorials": [
+    {
+      "id": 1,
+      "title": "The Vue Tutorial",
+      "description": "The best tips and tutorials for Vue",
+      "published": false
+    }
+  ]
+}
