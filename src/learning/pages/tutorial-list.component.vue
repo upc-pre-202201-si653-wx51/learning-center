@@ -52,40 +52,103 @@
             </span>
           </div>
         </template>
-        <pv-column selectionMode="multiple" style="width: 3rem" :exportable="false"></pv-column>
-        <pv-column field="id" header="Id" :sortable="true" style="min-width: 12rem"></pv-column>
-        <pv-column field="title" header="Title" :sortable="true" style="min-width: 16rem"></pv-column>
-        <pv-column field="description" header="Description" :sortable="true" style="min-width: 16rem"></pv-column>
-        <pv-column field="status" header="Status" :sortable="true" style="min-width: 12rem">
+        <pv-column
+          selectionMode="multiple"
+          style="width: 3rem"
+          :exportable="false"
+        ></pv-column>
+        <pv-column
+          field="id"
+          header="Id"
+          :sortable="true"
+          style="min-width: 12rem"
+        ></pv-column>
+        <pv-column
+          field="title"
+          header="Title"
+          :sortable="true"
+          style="min-width: 16rem"
+        ></pv-column>
+        <pv-column
+          field="description"
+          header="Description"
+          :sortable="true"
+          style="min-width: 16rem"
+        ></pv-column>
+        <pv-column
+          field="status"
+          header="Status"
+          :sortable="true"
+          style="min-width: 12rem"
+        >
           <template #body="slotProps">
-            <pv-tag v-if="slotProps.data.status === 'Published'" severity="success">{{ slotProps.data.status }}</pv-tag>
+            <pv-tag
+              v-if="slotProps.data.status === 'Published'"
+              severity="success"
+              >{{ slotProps.data.status }}</pv-tag
+            >
             <pv-tag v-else severity="info">{{ slotProps.data.status }}</pv-tag>
           </template>
         </pv-column>
         <pv-column :exportable="false" style="min-width: 8rem">
           <template #body="slotProps">
-            <pv-button icon="pi pi-pencil" class="p-button-text p-button-rounded" @click="editTutorial(slotProps.data)"/>
-            <pv-button icon="pi pi-trash" class="p-button-text p-button-rounded" @click="confirmDeleteTutorial(slotProps.data)"/>
+            <pv-button
+              icon="pi pi-pencil"
+              class="p-button-text p-button-rounded"
+              @click="editTutorial(slotProps.data)"
+            />
+            <pv-button
+              icon="pi pi-trash"
+              class="p-button-text p-button-rounded"
+              @click="confirmDeleteTutorial(slotProps.data)"
+            />
           </template>
         </pv-column>
       </pv-data-table>
     </div>
-    <pv-dialog v-model:visible="tutorialDialog" :style="{ width: '450px'}" header="Tutorial Information" :modal="true" class="p-fluid">
+    <pv-dialog
+      v-model:visible="tutorialDialog"
+      :style="{ width: '450px' }"
+      header="Tutorial Information"
+      :modal="true"
+      class="p-fluid"
+    >
       <div class="field">
         <span class="p-float-label">
-          <pv-input-text type="text" id="title" v-model.trim="tutorial.title" required="true" autofocus :class="{'p-invalid': submitted && !tutorial.title }"/>
+          <pv-input-text
+            type="text"
+            id="title"
+            v-model.trim="tutorial.title"
+            required="true"
+            autofocus
+            :class="{ 'p-invalid': submitted && !tutorial.title }"
+          />
           <label for="title">Title</label>
-          <small class="p-error" v-if="submitted && !tutorial.title">Title is required.</small>
+          <small class="p-error" v-if="submitted && !tutorial.title"
+            >Title is required.</small
+          >
         </span>
       </div>
       <div class="field">
         <span class="p-float-label">
-          <pv-textarea id="description" v-model="tutorial.description" required="false" rows="2" cols="2"/>
+          <pv-textarea
+            id="description"
+            v-model="tutorial.description"
+            required="false"
+            rows="2"
+            cols="2"
+          />
           <label for="description">Description</label>
         </span>
       </div>
       <div class="field">
-        <pv-dropdown id="published" v-model="tutorial.status" :options="statuses" optionLabel="label" placeholder="Select an Status">
+        <pv-dropdown
+          id="published"
+          v-model="tutorial.status"
+          :options="statuses"
+          optionLabel="label"
+          placeholder="Select an Status"
+        >
           <template #value="slotProps">
             <div v-if="slotProps.value && slotProps.value.value">
               <span>{{ slotProps.value.label }}</span>
@@ -98,28 +161,72 @@
         </pv-dropdown>
       </div>
       <template #footer>
-        <pv-button label="Cancel" icon="pi pi-times" class="p-button-text" @click="hideDialog"/>
-        <pv-button label="Save" icon="pi pi-check" class="p-button-text" @click="saveTutorial"/>
+        <pv-button
+          label="Cancel"
+          icon="pi pi-times"
+          class="p-button-text"
+          @click="hideDialog"
+        />
+        <pv-button
+          label="Save"
+          icon="pi pi-check"
+          class="p-button-text"
+          @click="saveTutorial"
+        />
       </template>
     </pv-dialog>
-    <pv-dialog v-model:visible="deleteTutorialsDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
+    <pv-dialog
+      v-model:visible="deleteTutorialDialog"
+      :style="{ width: '450px' }"
+      header="Confirm"
+      :modal="true"
+    >
       <div class="confirmation-content">
-        <i class="pi pi-exclamation-triangle mr-3" syle="font-size: 2rem"/>
-        <span v-if="tutorial">Are you sure you want to delete <b>{{ tutorial.title }}</b></span>
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+        <span v-if="tutorial"
+          >Are you sure you want to delete <b>{{ tutorial.title }}</b></span
+        >
       </div>
       <template #footer>
-        <pv-button label="No" icon="pi pi-times" class="p-button-text" @click="deleteTutorialDialog = false"/>
-        <pv-button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteTutorial"/>
+        <pv-button
+          label="No"
+          icon="pi pi-times"
+          class="p-button-text"
+          @click="deleteTutorialDialog = false"
+        />
+        <pv-button
+          label="Yes"
+          icon="pi pi-check"
+          class="p-button-text"
+          @click="deleteTutorial"
+        />
       </template>
     </pv-dialog>
-    <pv-dialog v-model:visible="deleteTutorialsDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
+    <pv-dialog
+      v-model:visible="deleteTutorialsDialog"
+      :style="{ width: '450px' }"
+      header="Confirm"
+      :modal="true"
+    >
       <div class="confirmation-content">
-        <i class="pi pi-exclamation-triangle mr-3" syle="font-size: 2rem"/>
-        <span v-if="selectedTutorials">Are you sure you want to delete the selected tutorials?</span>
+        <i class="pi pi-exclamation-triangle mr-3" syle="font-size: 2rem" />
+        <span v-if="selectedTutorials"
+          >Are you sure you want to delete the selected tutorials?</span
+        >
       </div>
       <template #footer>
-        <pv-button label="No" icon="pi pi-times" class="p-button-text" @click="deleteTutorialsDialog = false"/>
-        <pv-button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteSelectedTutorials"/>
+        <pv-button
+          label="No"
+          icon="pi pi-times"
+          class="p-button-text"
+          @click="deleteTutorialsDialog = false"
+        />
+        <pv-button
+          label="Yes"
+          icon="pi pi-check"
+          class="p-button-text"
+          @click="deleteSelectedTutorials"
+        />
       </template>
     </pv-dialog>
   </div>

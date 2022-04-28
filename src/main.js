@@ -18,6 +18,7 @@ import Toast from "primevue/toast";
 import Sidebar from "primevue/sidebar";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
+import Textarea from "primevue/textarea";
 
 const app = createApp(App);
 
@@ -41,5 +42,6 @@ app.component("pv-toast", Toast);
 app.component("pv-sidebar", Sidebar);
 app.component("pv-dropdown", Dropdown);
 app.component("pv-tag", Tag);
+app.component("pv-textarea",Textarea);
 
 app.mount("#app");
