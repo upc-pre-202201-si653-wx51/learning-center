@@ -1,5 +1,128 @@
 <template>
-  <div></div>
+  <div>
+    <div class="card">
+      <pv-toolbar class="mb-4">
+        <template #start>
+          <pv-button
+            label="New"
+            icon="pi pi-plus"
+            class="p-button-success mr-2"
+            @click="openNew"
+          />
+          <pv-button
+            label="Delete"
+            icon="pi pi-trash"
+            class="p-button-danger"
+            @click="confirmDeleteSelected"
+            :disabled="!selectedTutorials || !selectedTutorials.length"
+          />
+        </template>
+        <template #end>
+          <pv-button
+            label="Export"
+            icon="pi pi-upload"
+            class="p-button-help"
+            @click="exportToCSV($event)"
+          />
+        </template>
+      </pv-toolbar>
+      <pv-data-table
+        ref="dt"
+        :value="tutorials"
+        v-model:selection="selectedTutorials"
+        dataKey="id"
+        :paginator="true"
+        :rows="10"
+        :filters="filters"
+        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+        :rowsPerPageOptions="[5, 10, 15]"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} tutorials"
+        responsiveLayout="scroll"
+      >
+        <template #header>
+          <div
+            class="table-header flex flex-column md:flex-row md:justify-content-between"
+          >
+            <h5 class="mb-2 md:m-0 p-as-md-center">Manage Tutorials</h5>
+            <span class="p-input-icon-left"
+              ><i class="pi pi-search" /><pv-input-text
+                v-model="filters['global'].value"
+                placeholder="Search..."
+              />
+            </span>
+          </div>
+        </template>
+        <pv-column selectionMode="multiple" style="width: 3rem" :exportable="false"></pv-column>
+        <pv-column field="id" header="Id" :sortable="true" style="min-width: 12rem"></pv-column>
+        <pv-column field="title" header="Title" :sortable="true" style="min-width: 16rem"></pv-column>
+        <pv-column field="description" header="Description" :sortable="true" style="min-width: 16rem"></pv-column>
+        <pv-column field="status" header="Status" :sortable="true" style="min-width: 12rem">
+          <template #body="slotProps">
+            <pv-tag v-if="slotProps.data.status === 'Published'" severity="success">{{ slotProps.data.status }}</pv-tag>
+            <pv-tag v-else severity="info">{{ slotProps.data.status }}</pv-tag>
+          </template>
+        </pv-column>
+        <pv-column :exportable="false" style="min-width: 8rem">
+          <template #body="slotProps">
+            <pv-button icon="pi pi-pencil" class="p-button-text p-button-rounded" @click="editTutorial(slotProps.data)"/>
+            <pv-button icon="pi pi-trash" class="p-button-text p-button-rounded" @click="confirmDeleteTutorial(slotProps.data)"/>
+          </template>
+        </pv-column>
+      </pv-data-table>
+    </div>
+    <pv-dialog v-model:visible="tutorialDialog" :style="{ width: '450px'}" header="Tutorial Information" :modal="true" class="p-fluid">
+      <div class="field">
+        <span class="p-float-label">
+          <pv-input-text type="text" id="title" v-model.trim="tutorial.title" required="true" autofocus :class="{'p-invalid': submitted && !tutorial.title }"/>
+          <label for="title">Title</label>
+          <small class="p-error" v-if="submitted && !tutorial.title">Title is required.</small>
+        </span>
+      </div>
+      <div class="field">
+        <span class="p-float-label">
+          <pv-textarea id="description" v-model="tutorial.description" required="false" rows="2" cols="2"/>
+          <label for="description">Description</label>
+        </span>
+      </div>
+      <div class="field">
+        <pv-dropdown id="published" v-model="tutorial.status" :options="statuses" optionLabel="label" placeholder="Select an Status">
+          <template #value="slotProps">
+            <div v-if="slotProps.value && slotProps.value.value">
+              <span>{{ slotProps.value.label }}</span>
+            </div>
+            <div v-else-if="slotProps.value && !slotProps.value.value">
+              <span>{{ slotProps.value }}</span>
+            </div>
+            <span v-else>{{ slotProps.placeholder }}</span>
+          </template>
+        </pv-dropdown>
+      </div>
+      <template #footer>
+        <pv-button label="Cancel" icon="pi pi-times" class="p-button-text" @click="hideDialog"/>
+        <pv-button label="Save" icon="pi pi-check" class="p-button-text" @click="saveTutorial"/>
+      </template>
+    </pv-dialog>
+    <pv-dialog v-model:visible="deleteTutorialsDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
+      <div class="confirmation-content">
+        <i class="pi pi-exclamation-triangle mr-3" syle="font-size: 2rem"/>
+        <span v-if="tutorial">Are you sure you want to delete <b>{{ tutorial.title }}</b></span>
+      </div>
+      <template #footer>
+        <pv-button label="No" icon="pi pi-times" class="p-button-text" @click="deleteTutorialDialog = false"/>
+        <pv-button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteTutorial"/>
+      </template>
+    </pv-dialog>
+    <pv-dialog v-model:visible="deleteTutorialsDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
+      <div class="confirmation-content">
+        <i class="pi pi-exclamation-triangle mr-3" syle="font-size: 2rem"/>
+        <span v-if="selectedTutorials">Are you sure you want to delete the selected tutorials?</span>
+      </div>
+      <template #footer>
+        <pv-button label="No" icon="pi pi-times" class="p-button-text" @click="deleteTutorialsDialog = false"/>
+        <pv-button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteSelectedTutorials"/>
+      </template>
+    </pv-dialog>
+  </div>
 </template>
 
 <script>
@@ -19,8 +142,8 @@ export default {
       filters: {},
       submitted: false,
       statuses: [
-        { label: "Published", value: true },
-        { label: "Unpublished", value: false },
+        { label: "Published", value: "published" },
+        { label: "Unpublished", value: "unpublished" },
       ],
       tutorialsService: null,
     };
@@ -29,14 +152,18 @@ export default {
     this.tutorialsService = new TutorialsApiService();
     this.tutorialsService.getAll().then((response) => {
       this.tutorials = response.data;
-      this.tutorials.forEach((tutorial) => (this.getDisplayableTutorial(tutorial)));
+      this.tutorials.forEach((tutorial) =>
+        this.getDisplayableTutorial(tutorial)
+      );
       console.log(this.tutorials);
     });
     this.initFilters();
   },
   methods: {
     getDisplayableTutorial(tutorial) {
-      tutorial.status = tutorial.published ? this.statuses[0].label : this.statuses[1].label;
+      tutorial.status = tutorial.published
+        ? this.statuses[0].label
+        : this.statuses[1].label;
       return tutorial;
     },
     getStorableTutorial(displayableTutorial) {
@@ -44,7 +171,7 @@ export default {
         id: displayableTutorial.id,
         title: displayableTutorial.title,
         description: displayableTutorial.description,
-        published: displayableTutorial.status.label === "Published"
+        published: displayableTutorial.status.label === "Published",
       };
     },
     initFilters() {
@@ -69,10 +196,17 @@ export default {
       if (this.tutorial.title.trim()) {
         if (this.tutorial.id) {
           this.tutorial = this.getStorableTutorial(this.tutorial);
-          this.tutorialsService.update(this.tutorial.id, this.tutorial)
-            .then((response)=> {
-              this.tutorials[this.findIndexById(response.data.id)] = this.getDisplayableTutorial(response.data);
-              this.$toast.add({ severity: "success", summary: "Successful", detail: "Tutorial Updated", life: 3000});
+          this.tutorialsService
+            .update(this.tutorial.id, this.tutorial)
+            .then((response) => {
+              this.tutorials[this.findIndexById(response.data.id)] =
+                this.getDisplayableTutorial(response.data);
+              this.$toast.add({
+                severity: "success",
+                summary: "Successful",
+                detail: "Tutorial Updated",
+                life: 3000,
+              });
               console.log(response);
             });
         } else {
@@ -81,7 +215,12 @@ export default {
           this.tutorialsService.create(this.tutorial).then((response) => {
             this.tutorial = this.getDisplayableTutorial(response.data);
             this.tutorials.push(this.tutorial);
-            this.$toast.add({ severity: "success", summary: "Successful", detail: "Tutorial Created", life: 3000});
+            this.$toast.add({
+              severity: "success",
+              summary: "Successful",
+              detail: "Tutorial Created",
+              life: 3000,
+            });
             console.log(response);
           });
         }
@@ -90,7 +229,7 @@ export default {
       this.tutorial = {};
     },
     editTutorial(tutorial) {
-      this.tutorial = {...tutorial};
+      this.tutorial = { ...tutorial };
       this.tutorialDialog = true;
     },
     confirmDeleteTutorial(tutorial) {
@@ -104,7 +243,12 @@ export default {
         );
         this.deleteTutorialDialog = false;
         this.tutorial = {};
-        this.$toast.add({ severity: "success", summary: "Successful", detail: "Tutorial Deleted", life: 3000});
+        this.$toast.add({
+          severity: "success",
+          summary: "Successful",
+          detail: "Tutorial Deleted",
+          life: 3000,
+        });
         console.log(response);
       });
     },
@@ -117,12 +261,14 @@ export default {
     deleteSelectedTutorials() {
       this.selectedTutorials.forEach((tutorial) => {
         this.tutorialsService.delete(tutorial.id).then((response) => {
-          this.tutorials = this.tutorials.filter((t) => t.id !== this.tutorial.id);
+          this.tutorials = this.tutorials.filter(
+            (t) => t.id !== this.tutorial.id
+          );
           console.log(response);
         });
       });
       this.deleteTutorialsDialog = false;
-    }
+    },
   },
 };
 </script>
