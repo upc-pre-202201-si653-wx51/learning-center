@@ -28,7 +28,7 @@
       "id": 5,
       "title": "The C# Corner",
       "description": "Only for coding warriors",
-      "published": false
+      "published": true
     }
   ],
   "instructors": [

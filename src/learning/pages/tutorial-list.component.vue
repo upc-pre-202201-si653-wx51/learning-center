@@ -43,7 +43,7 @@
           <div
             class="table-header flex flex-column md:flex-row md:justify-content-between"
           >
-            <h5 class="mb-2 md:m-0 p-as-md-center">Manage Tutorials</h5>
+            <h5 class="mb-2 md:m-0 p-as-md-center text-xl">Manage Tutorials</h5>
             <span class="p-input-icon-left"
               ><i class="pi pi-search" /><pv-input-text
                 v-model="filters['global'].value"
