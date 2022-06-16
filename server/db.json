@@ -84,5 +84,12 @@
       "topicId": 1,
       "level": "Advanced"
     }
+  ],
+  "users": [
+    {
+      "email": "john.doe@gmail.com",
+      "password": "$2a$10$XlTweadaICStTeywPY0oZ.bc5EHa3xD8vx9PZAvgzRCXBA6VMs.2.",
+      "id": 1
+    }
   ]
 }

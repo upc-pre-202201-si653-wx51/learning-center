@@ -16,7 +16,6 @@ export default {
 <template>
   <pv-toast></pv-toast>
   <header>
-
     <pv-toolbar class="bg-primary">
       <template #start>
         <pv-button class="p-button-text text-white" icon="pi pi-bars" @click="drawer=!drawer"></pv-button>
